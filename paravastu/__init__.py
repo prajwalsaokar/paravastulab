@@ -503,6 +503,75 @@ def CheckAllPotentialClashes(PDBDataFrame, Save=False, FileName=None, Format=".p
         display(Figure)
         plt.clf()
 
+#Plot 2D XY Scatter Plots
+def list_plot(
+    data, #Array of XY Datasets
+    title="Graph", #Title of Graph
+    xlabel="", #Label of X-Axis
+    ylabel="", #Label of Y-Axis
+    datalabels=["", "", "", "", "", ""], #Labels for each XY Series
+    plotscale=[0, 0, 0, 0], # [plot_x_min, plot_x_max, plot_y_min, plot_y_max]
+    xscale=[0, 0, 0], #[x_min, x_max, x_step]
+    yscale=[0, 0, 0], #[y_min, y_max, y_step]
+    markers=["^", "D", "o", "s", "p", "*"], #shape of data markers (first in array corresponds to first series, second element to second series etc.)
+    markersizes=[5, 5, 5, 5, 5, 5], #size of data marker
+    colors=["b", "r", "g", "m", "y", "k"], #color of data marker
+    fill="none", #fill of data markers
+    majorlen=7, #length of major axis ticks
+    minorlen=2, #lenght of minor axis ticks
+    lineconnect="none", #connect the data points linearly (connect the dots)
+    curveFit=False, #approximate a curve fit (5th order polynomial)
+    saveSVG=False, #save plot as an SVG file
+):
+    import matplotlib.pyplot as plt
+    import numpy as np
+    from numpy.polynomial.polynomial import polyfit
+
+    # strip data array into individual sets and plot them
+    for i in range(len(data)):
+        plt.plot(
+            data[i][:, 0],
+            data[i][:, 1],
+            marker=markers[i],
+            ms=markersizes[i],
+            label=datalabels[i],
+            fillstyle=fill,
+            linestyle=lineconnect,
+            color=colors[i],
+        )
+
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+
+    if plotscale != [0, 0, 0, 0]:
+        plt.axis(plotscale)
+    plt.minorticks_on()
+
+    if xscale != [0, 0, 0]:
+        plt.xticks(np.arange(xscale[0], xscale[1] + xscale[2], step=xscale[2]))
+    plt.tick_params(axis="x", which="major", length=majorlen)
+    plt.tick_params(axis="x", which="minor", length=minorlen)
+    if yscale != [0, 0, 0]:
+        plt.yticks(np.arange(yscale[0], yscale[1] + yscale[2], step=yscale[2]))
+    plt.tick_params(axis="y", which="major", length=majorlen)
+    plt.tick_params(axis="y", which="minor", length=minorlen)
+
+    if curveFit:
+        space = np.linspace(start=plt.xticks()[0][0], stop=plt.xticks()[0][-1], num=100)
+        for i in range(len(data)):
+            eq = np.polyfit(data[i][:, 0], data[i][:, 1], deg=10)
+            plt.plot(
+                space,
+                np.polyval(eq, space),
+                label=("fit " + datalabels[i]),
+                color=colors[i],
+            )
+
+    if saveSVG:
+        plt.savefig(title + ".svg")
+    plt.legend(loc="best")
+    return plt
 
 def FindParavastuFunction(SearchString):
     paravastu_functions = dir(labmodule)
