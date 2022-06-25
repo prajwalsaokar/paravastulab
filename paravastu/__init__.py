@@ -506,15 +506,16 @@ def CheckAllPotentialClashes(PDBDataFrame, Save=False, FileName=None, Format=".p
 #Plot 2D XY Scatter Plots
 def list_plot(
     data, #Array of XY Datasets
-    title="Graph", #Title of Graph
-    xlabel="", #Label of X-Axis
+    title="", #Title of Graph
+    xlabel="Anant will complain if you don't label your x-axis", #Label of X-Axis
     ylabel="", #Label of Y-Axis
     datalabels=["", "", "", "", "", ""], #Labels for each XY Series
     plotscale=[0, 0, 0, 0], # [plot_x_min, plot_x_max, plot_y_min, plot_y_max]
     xscale=[0, 0, 0], #[x_min, x_max, x_step]
     yscale=[0, 0, 0], #[y_min, y_max, y_step]
-    markers=["^", "D", "o", "s", "p", "*"], #shape of data markers (first in array corresponds to first series, second element to second series etc.)
-    markersizes=[5, 5, 5, 5, 5, 5], #size of data marker
+    aspect = 'auto', #set aspect ratio (y/x scale)
+    markers=["o", "^", "s", "v", "D", "*"], #shape of data  markers (first in array corresponds to first series, second element to second series etc.)
+    markersizes=[5, 6, 5, 5, 5, 5], #size of data marker
     colors=["b", "r", "g", "m", "y", "k"], #color of data marker
     fill="none", #fill of data markers
     majorlen=7, #length of major axis ticks
@@ -525,7 +526,6 @@ def list_plot(
 ):
     import matplotlib.pyplot as plt
     import numpy as np
-    from numpy.polynomial.polynomial import polyfit
 
     # strip data array into individual sets and plot them
     for i in range(len(data)):
@@ -540,9 +540,13 @@ def list_plot(
             color=colors[i],
         )
 
-    plt.title(title)
+
+    plt.title(title, pad = 12)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
+
+    axes = plt.gca()
+    axes.set_aspect(aspect)
 
     if plotscale != [0, 0, 0, 0]:
         plt.axis(plotscale)
@@ -550,14 +554,15 @@ def list_plot(
 
     if xscale != [0, 0, 0]:
         plt.xticks(np.arange(xscale[0], xscale[1] + xscale[2], step=xscale[2]))
-    plt.tick_params(axis="x", which="major", length=majorlen)
-    plt.tick_params(axis="x", which="minor", length=minorlen)
+    plt.tick_params(axis="x", which="major", length=majorlen, bottom = True, top = True)
+    plt.tick_params(axis="x", which="minor", length=minorlen, bottom = True, top = True)
     if yscale != [0, 0, 0]:
         plt.yticks(np.arange(yscale[0], yscale[1] + yscale[2], step=yscale[2]))
-    plt.tick_params(axis="y", which="major", length=majorlen)
-    plt.tick_params(axis="y", which="minor", length=minorlen)
+    plt.tick_params(axis="y", which="major", length=majorlen, left = True, right = True)
+    plt.tick_params(axis="y", which="minor", length=minorlen, left = True, right = True)
 
     if curveFit:
+        from numpy.polynomial.polynomial import polyfit
         space = np.linspace(start=plt.xticks()[0][0], stop=plt.xticks()[0][-1], num=100)
         for i in range(len(data)):
             eq = np.polyfit(data[i][:, 0], data[i][:, 1], deg=10)
@@ -572,7 +577,7 @@ def list_plot(
         plt.savefig(title + ".svg")
     plt.legend(loc="best")
     return plt
-
+        
 def FindParavastuFunction(SearchString):
     paravastu_functions = dir(labmodule)
     return [item for item in paravastu_functions if item.find(SearchString) > -1]
